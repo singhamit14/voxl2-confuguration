@@ -22,10 +22,12 @@ docs are silent or wrong, these notes record what the hardware actually did.
 - QGroundControl over the USB-C cable through a TCP relay
 - RC channel map verified end to end (AETR: ch1 roll, ch2 pitch, ch3 throttle, ch4 yaw)
 - Battery configured: 6S, 9000 mAh
+- **DIY PWM ESC adapter** — a generic Blue Pill running ModalAI's M0065 firmware, detected by PX4 and
+  driving 4 verified PWM outputs, instead of waiting 30-40 days for the real M0065
 - Autonomy stack installed and configured — `voxl-vision-hub` with VIO and obstacle avoidance
   enabled, QVIO, OpenVINS, DFS, TFLite
 
-**Not yet present** — ESC, motors, frame, props, GPS/magnetometer, Wi-Fi hardware.
+**Not yet present** — ESC, props, GPS/magnetometer, Wi-Fi hardware. Frame and motors are in hand.
 
 The software is ready; the airframe is the critical path.
 
@@ -54,6 +56,8 @@ Read-only board audit:
 | File | Contents |
 |---|---|
 | [`adb-shell-commands.md`](adb-shell-commands.md) | **Full ADB/PX4 command reference**, organised by task |
+| [`m0065-diy.md`](m0065-diy.md) | Building a PWM ESC adapter from a Blue Pill: pinout reverse-engineered from ModalAI's firmware, the 16 MHz crystal fix, PX4 setup |
+| `m0065-stub/` | Boot stub + flashing tooling for that adapter |
 | [`SETUP.md`](SETUP.md) | Version checks, what hardware is attached, §3h battery/power |
 | [`RCSETUP.md`](RCSETUP.md) | ELRS/CRSF setup, QGC connection (§6b), RC calibration (§7) |
 | [`AUTONOMY.md`](AUTONOMY.md) | Roadmap: hover → VIO → obstacle avoidance → offboard → perception |
@@ -120,6 +124,17 @@ everything. `rc_channels` and `manual_control_input` read **empty** — use `inp
 
 `voxl-esc detect` stops **and disables** `voxl-px4`. `voxl-camera-server -l` stops the camera
 service. After any debugging, run `voxl-inspect-services` and look for **Enabled + Not Running**.
+
+### The M0065 PWM adapter expects a 16 MHz crystal
+
+A Blue Pill has 8 MHz. ModalAI's firmware sets `PLLXTPRE` (HSE/2) x9 expecting 16 MHz -> 72 MHz, so
+on 8 MHz it runs at **36 MHz — everything half speed**: the host UART lands at 461538 instead of
+921600 and PWM at 200 Hz instead of 400 Hz. The only symptom is an endless
+`Board version info response timeout`. One byte fixes it (`m0065-diy.md` §9), or fit a 16 MHz part.
+
+Its firmware is also **not standalone**: it links at `0x08001C00` and expects ModalAI's
+(undistributed) bootloader below. A 44-byte stub at `0x08000000` that sets `VTOR` and jumps is
+enough — the bootloader is only needed for UART firmware updates, and SWD replaces that.
 
 ### VOXL 2 has no onboard Wi-Fi and no USB-A port
 

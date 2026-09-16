@@ -1,0 +1,351 @@
+<title>VOXL 2 Drone Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --ground:#F1F2EF; --panel:#FFFFFF; --sunk:#E6E8E3;
+  --ink:#191D1B; --ink-2:#4A524E; --ink-3:#767E79;
+  --rule:#D3D7D1; --rule-2:#BFC5BE;
+  --accent:#0F646E; --accent-soft:#DCEBEC;
+  --ok:#3F6E36; --ok-soft:#E1EBDD;
+  --warn:#8A6210; --warn-soft:#F2E9D5;
+  --miss:#9C3A2A; --miss-soft:#F3E0DC;
+  --code-bg:#1B2124; --code-ink:#DDE4E2; --code-cmt:#7E8D8A;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#13171A; --panel:#1B2024; --sunk:#232A2E;
+    --ink:#E4E8E5; --ink-2:#AEB6B2; --ink-3:#7D8783;
+    --rule:#2D353A; --rule-2:#3D474C;
+    --accent:#59B3BE; --accent-soft:#17353A;
+    --ok:#8FBF80; --ok-soft:#1D2C1B;
+    --warn:#D9AC57; --warn-soft:#332714;
+    --miss:#DE8B79; --miss-soft:#361F1A;
+    --code-bg:#0E1315; --code-ink:#D5DEDB; --code-cmt:#788683;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#13171A; --panel:#1B2024; --sunk:#232A2E;
+  --ink:#E4E8E5; --ink-2:#AEB6B2; --ink-3:#7D8783;
+  --rule:#2D353A; --rule-2:#3D474C;
+  --accent:#59B3BE; --accent-soft:#17353A;
+  --ok:#8FBF80; --ok-soft:#1D2C1B;
+  --warn:#D9AC57; --warn-soft:#332714;
+  --miss:#DE8B79; --miss-soft:#361F1A;
+  --code-bg:#0E1315; --code-ink:#D5DEDB; --code-cmt:#788683;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif; font-size:17px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:880px; margin:0 auto; padding:0 24px 96px}
+h1,h2,h3,.eyebrow,.tile-k,.gate-k,th,.stage-n,.pill{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,kbd,.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+
+/* masthead */
+.masthead{padding:72px 0 36px; border-bottom:2px solid var(--ink); margin-bottom:8px}
+.eyebrow{
+  font-size:11.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 18px;
+}
+h1{
+  font-size:clamp(38px,7vw,60px); font-weight:700; letter-spacing:-.025em; line-height:1.02;
+  margin:0 0 20px; text-wrap:balance;
+}
+.standfirst{font-size:19px; color:var(--ink-2); margin:0; max-width:64ch}
+
+/* bench grid */
+.bench{margin:44px 0 12px}
+h2{
+  font-size:13px; font-weight:600; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 20px; padding-bottom:10px; border-bottom:1px solid var(--rule);
+}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule)}
+.tile{background:var(--panel); padding:16px 16px 18px; display:flex; flex-direction:column; gap:7px}
+.tile-k{font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
+.tile-v{font-family:"IBM Plex Mono",monospace; font-size:14.5px; font-weight:500; line-height:1.35; font-variant-numeric:tabular-nums}
+.pill{
+  align-self:flex-start; font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px;
+}
+.p-ok{background:var(--ok-soft); color:var(--ok)}
+.p-warn{background:var(--warn-soft); color:var(--warn)}
+.p-miss{background:var(--miss-soft); color:var(--miss)}
+.p-hold{background:var(--accent-soft); color:var(--accent)}
+
+/* stages */
+.stages{list-style:none; margin:56px 0 0; padding:0; counter-reset:s}
+.stage{
+  counter-increment:s; display:grid; grid-template-columns:62px 1fr; gap:0 26px;
+  padding:38px 0; border-top:1px solid var(--rule);
+}
+.stage:first-child{border-top:2px solid var(--ink)}
+.stage-n{color:var(--accent); padding-top:6px; line-height:1.1}
+.stage-n::before{
+  content:"Stage"; display:block; font-size:10px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:2px;
+}
+.stage-n::after{
+  content:counter(s,decimal-leading-zero); display:block;
+  font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+}
+.stage-b h3{font-size:25px; font-weight:600; letter-spacing:-.015em; margin:0 0 6px; text-wrap:balance}
+.why{color:var(--ink-3); font-size:15px; font-style:italic; margin:0 0 20px}
+.stage-b p{margin:0 0 15px; max-width:66ch}
+.stage-b ul,.stage-b ol{margin:0 0 15px; padding-left:20px; max-width:66ch}
+.stage-b li{margin-bottom:7px}
+strong{font-weight:600}
+a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px}
+
+/* code */
+pre{
+  background:var(--code-bg); color:var(--code-ink); padding:15px 17px; border-radius:3px;
+  overflow-x:auto; font-size:13.5px; line-height:1.65; margin:0 0 15px;
+}
+p code,li code,td code{
+  background:var(--sunk); padding:1.5px 5px; border-radius:2px; font-size:13.5px; color:var(--ink);
+}
+/* must come after the inline-code rule: `li code` also matches code inside <pre> */
+pre code, pre code span{
+  font-size:inherit; background:none; padding:0; border-radius:0; color:inherit;
+}
+.cmt{color:var(--code-cmt)}
+
+/* tables */
+.tw{overflow-x:auto; margin:0 0 16px; border:1px solid var(--rule)}
+table{border-collapse:collapse; width:100%; font-size:14.5px; background:var(--panel)}
+th{
+  text-align:left; font-size:10.5px; font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--ink-3); padding:10px 13px; border-bottom:1px solid var(--rule-2); white-space:nowrap;
+}
+td{padding:10px 13px; border-bottom:1px solid var(--rule); vertical-align:top; line-height:1.5}
+tr:last-child td{border-bottom:none}
+td.m,th.m{font-family:"IBM Plex Mono",monospace; font-size:13px; white-space:nowrap; font-variant-numeric:tabular-nums}
+
+/* gate */
+.gate{
+  background:var(--warn-soft); border-left:3px solid var(--warn); padding:14px 17px;
+  margin:20px 0 0; font-size:15px; line-height:1.55;
+}
+.gate-k{
+  display:block; font-size:10.5px; font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--warn); margin-bottom:5px;
+}
+.gate p{margin:0; max-width:none}
+.gate.stop{background:var(--miss-soft); border-left-color:var(--miss)}
+.gate.stop .gate-k{color:var(--miss)}
+
+/* paths */
+.path{border:1px solid var(--rule); background:var(--panel); padding:18px 20px; margin:0 0 14px}
+.path h4{
+  font-family:Archivo,sans-serif; font-size:15px; font-weight:600; margin:0 0 4px;
+  display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;
+}
+.path p{font-size:15px; color:var(--ink-2); margin:0}
+.rec{background:var(--accent-soft); color:var(--accent); font-size:9.5px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; padding:3px 7px; border-radius:2px;
+  font-family:Archivo,sans-serif;}
+
+footer{margin-top:60px; padding-top:22px; border-top:1px solid var(--rule); font-size:14px; color:var(--ink-3)}
+footer a{color:var(--ink-2)}
+footer ul{padding-left:18px; margin:10px 0 0}
+@media (max-width:620px){
+  .stage{grid-template-columns:1fr; gap:10px}
+  .stage-n{padding-top:0}
+  body{font-size:16px}
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Build plan &middot; M0054 &middot; 15 Sep 2026</p>
+  <h1>VOXL 2 Drone Build</h1>
+  <p class="standfirst">Your board is on the bench and talking. It already has flight code, an IMU, six cameras and a live 6S rail &mdash; what it does not have is anything that makes thrust. This is the path from here to a first hover.</p>
+</header>
+
+<section class="bench">
+  <h2>Bench state &mdash; read from the board</h2>
+  <div class="grid">
+    <div class="tile"><span class="tile-k">Board</span><span class="tile-v">M0054</span><span class="pill p-ok">Online</span></div>
+    <div class="tile"><span class="tile-k">System image</span><span class="tile-v">1.8.02-14.1a</span><span class="pill p-hold">Holding</span></div>
+    <div class="tile"><span class="tile-k">voxl-suite</span><span class="tile-v">1.4.0</span><span class="pill p-hold">Holding</span></div>
+    <div class="tile"><span class="tile-k">PX4</span><span class="tile-v">Running on SLPI</span><span class="pill p-ok">Active</span></div>
+    <div class="tile"><span class="tile-k">IMU</span><span class="tile-v">ICM-42688 / SPI</span><span class="pill p-ok">Publishing</span></div>
+    <div class="tile"><span class="tile-k">Power rail</span><span class="tile-v">24.43 V @ 0.09 A</span><span class="pill p-ok">6S live</span></div>
+    <div class="tile"><span class="tile-k">Cameras</span><span class="tile-v">5&times; OV7251<br>1&times; IMX214</span><span class="pill p-ok">Detected</span></div>
+    <div class="tile"><span class="tile-k">ESC</span><span class="tile-v">none on UART</span><span class="pill p-miss">Missing</span></div>
+    <div class="tile"><span class="tile-k">GPS / mag</span><span class="tile-v">never published</span><span class="pill p-miss">Missing</span></div>
+    <div class="tile"><span class="tile-k">RC link</span><span class="tile-v">ELRS / CRSF<br>link quality 100</span><span class="pill p-ok">Linked</span></div>
+    <div class="tile"><span class="tile-k">Board network</span><span class="tile-v">unknown host</span><span class="pill p-miss">Offline</span></div>
+    <div class="tile"><span class="tile-k">Airframe</span><span class="tile-v">not built</span><span class="pill p-miss">Missing</span></div>
+  </div>
+</section>
+
+<ol class="stages">
+
+<li class="stage">
+  <div class="stage-n"></div>
+  <div class="stage-b">
+    <h3>Stay on SDK 1.4 &mdash; verify, do not flash</h3>
+    <p class="why">The stack you were shipped already does everything this build needs, and it is calibrated to your specific hardware. Upgrading buys documentation alignment and risks the one thing you cannot regenerate.</p>
+    <p>An earlier draft of this plan opened with a flash to SDK 1.6.6. Checking the board rather than the changelog overturned that. Three things decide it:</p>
+    <ul>
+      <li><strong>Your ESC is already supported.</strong> <code>voxl-esc 1.4.8</code> ships <code>esc_params_generic_m0134_6.xml</code> &mdash; the 6S board in stage 2 is known to the tooling you have. This was the one finding that could have forced an upgrade, and it did not.</li>
+      <li><strong>PX4 1.14.0 is a complete multicopter stack.</strong> Nothing in stages 3&ndash;6 needs a newer one.</li>
+      <li><strong>Your calibration is per-unit and irreplaceable.</strong> Stereo front and rear extrinsics and intrinsics, tracking intrinsics, and an IMU calibration all sit in <code>/data/modalai</code>. They were measured against your physical cameras at the factory and cannot be recreated without calibration targets and a rig.</li>
+    </ul>
+    <p>The board also carries 72 offline <code>.deb</code> packages in <code>/data/voxl-suite-offline-packages</code>, so the missing network route does not block installing anything from the 1.4 set.</p>
+    <p>Back the calibration up anyway &mdash; it costs nothing and it is the only copy:</p>
+<pre><code><span class="cmt"># already done: 13 calibration files + PX4 params -> /home/amit/voxl/backup</span>
+adb pull /data/modalai /home/amit/voxl/backup/modalai
+adb pull /data/px4     /home/amit/voxl/backup/px4</code></pre>
+    <p>Then confirm the stack is healthy and move straight to stage 2:</p>
+<pre><code>voxl-version
+systemctl is-active voxl-px4
+ls /usr/share/modalai/voxl-esc-params/boards/</code></pre>
+    <div class="gate">
+      <span class="gate-k">When upgrading does become the right call</span>
+      <p>Three triggers, none of which apply yet: you hit a bug fixed upstream; you post to the ModalAI forum and are asked to reproduce on a current SDK; or you add hardware newer than the 1.4 tooling knows &mdash; check <code>/usr/share/modalai/voxl-esc-params/boards/</code> before buying. If that day comes, the target is <strong>SDK 1.6.6</strong> with system image <strong>1.8.08</strong> (1.6.7 and 1.6.8 are QCS6490-only; 1.7 and 1.8 are alpha and beta). Download <code>voxl2_SDK_1.6.6.tar.gz</code> from <a href="https://downloads.modalai.com">downloads.modalai.com</a>, run <code>./install.sh</code>, answer <strong>preserve</strong> at the <code>/data</code> prompt, and do not interrupt it &mdash; a killed flash corrupts the filesystem.</p>
+    </div>
+  </div>
+</li>
+
+<li class="stage">
+  <div class="stage-n"></div>
+  <div class="stage-b">
+    <h3>Pick the thrust path, then order</h3>
+    <p class="why">Your ESC choice decides your airframe size, not the other way round.</p>
+    <p>Your <code>voxl-px4.conf</code> is already set to <code>ESC=VOXL_ESC</code> and <code>RC=CRSF_RAW</code>, so the least-friction build follows that. The constraint is current: ModalAI's 4-in-1 is rated <strong>10A+ per channel</strong>, which is a compact quad, not a 500mm hauler.</p>
+
+    <div class="path">
+      <h4>Path A &mdash; VOXL ESC on UART <span class="rec">Recommended</span></h4>
+      <p>Use the <strong>M0134-6</strong> (2&ndash;6S, 5.5&ndash;26V, 10A+/channel). Matches your live 24.4V rail and your existing config, and gives you per-motor RPM feedback and current sensing that PX4 actually uses. Build a <strong>250&ndash;350mm quad on 5&ndash;7&Prime; props</strong>. Note the <code>-6</code> suffix &mdash; the M0134-1 and -3 variants are 4S only and will not survive your 6S pack.</p>
+    </div>
+    <div class="path">
+      <h4>Path B &mdash; VOXL 2 IO + third-party PWM ESC</h4>
+      <p>Add the <strong>M0065</strong> I/O expander (8&times; PWM + S.Bus, 25&times;33mm, 4g) and drive any third-party 6S 4-in-1. Take this only if you want a heavier 450&ndash;500mm airframe with 30A+ motors. Costs you the RPM telemetry and needs <code>ESC=VOXL2_IO_PWM_ESC</code> plus a firmware check &mdash; boards sold before 2024 need a bootloader update over the debug header.</p>
+    </div>
+
+    <p>Parts for Path A, assuming the APM power module already feeding your 24.4V rail stays:</p>
+    <div class="tw"><table>
+      <tr><th>Part</th><th>Spec</th><th>Note</th></tr>
+      <tr><td>ESC</td><td class="m">M0134-6</td><td>4-in-1, 2&ndash;6S, UART to J18</td></tr>
+      <tr><td>Frame</td><td class="m">250&ndash;350 mm</td><td>Carbon X-quad; needs a deck that fits the VOXL 2 footprint</td></tr>
+      <tr><td>Motors &times;4</td><td class="m">6S-rated</td><td>~1500&ndash;1900KV for 5&Prime;, ~1100&ndash;1300KV for 7&Prime;. Keep continuous draw under the 10A/ch budget</td></tr>
+      <tr><td>Props</td><td class="m">5&Prime; or 7&Prime;</td><td>Match to motor KV; buy spares, you will break them</td></tr>
+      <tr><td>GPS + mag</td><td class="m">u-blox M9N</td><td>Holybro or ModalAI unit. Supplies the magnetometer you are currently missing</td></tr>
+      <tr><td>RC receiver</td><td class="m">CRSF</td><td>TBS Crossfire Nano RX or ELRS &mdash; config is already CRSF_RAW</td></tr>
+      <tr><td>Battery</td><td class="m">6S 1500&ndash;3000mAh</td><td>Plus a charger and a LiPo-safe bag</td></tr>
+      <tr><td>Cable</td><td class="m">MCBL-00081</td><td>J18 &rarr; ESC. Order ModalAI cables with the boards; they are keyed and fiddly to source later</td></tr>
+    </table></div>
+    <div class="gate">
+      <span class="gate-k">Order the cables with the boards</span>
+      <p>ModalAI uses JST GH keyed connectors throughout. The single most common way a build stalls for two weeks is having every board on the bench and no cable to join them.</p>
+    </div>
+  </div>
+</li>
+
+<li class="stage">
+  <div class="stage-n"></div>
+  <div class="stage-b">
+    <h3>Wire the airframe</h3>
+    <p class="why">Everything on these headers is 3.3V logic. There is no tolerance for 5V on a signal pin.</p>
+    <div class="tw"><table>
+      <tr><th class="m">Port</th><th>Carries</th><th>Connect</th></tr>
+      <tr><td class="m">J4</td><td>Main power in, 5V + I2C battery monitoring</td><td>APM power module</td></tr>
+      <tr><td class="m">J18</td><td>ESC UART @ 3.3V</td><td>M0134-6</td></tr>
+      <tr><td class="m">J19</td><td>GNSS UART + mag I2C + RC UART + 5V</td><td>GPS/mag unit and CRSF receiver share this one</td></tr>
+      <tr><td class="m">J9</td><td>USB-C</td><td>ADB to your PC &mdash; what you are on now</td></tr>
+      <tr><td class="m">J6 / J7 / J8</td><td>Camera groups 0 / 1 / 2, 4-lane MIPI CSI each</td><td>Already populated</td></tr>
+      <tr><td class="m">J2</td><td>Fan control, 5V PWM</td><td>Cooling fan &mdash; fit one, the QRB5165 throttles hot</td></tr>
+      <tr><td class="m">J10</td><td>External SPI expansion</td><td>Spare</td></tr>
+    </table></div>
+    <p>J19 is the busy one: GNSS, magnetometer and RC all land on that single 12-pin header, so you will be using a breakout pigtail rather than plugging two things in.</p>
+    <div class="gate">
+      <span class="gate-k">Verify before you plug</span>
+      <p>Check this map against the <a href="https://docs.modalai.com/voxl2-connectors/">VOXL 2 connector datasheet</a> for your exact board revision before applying power. Confirm motor rotation directions and prop handedness on the bench in stage 5, not in the air.</p>
+    </div>
+  </div>
+</li>
+
+<li class="stage">
+  <div class="stage-n"></div>
+  <div class="stage-b">
+    <h3>Configure PX4</h3>
+    <p class="why">Your config already names the right hardware &mdash; this is confirming it against what you actually bolted on.</p>
+    <p>Re-run the configure pass after the airframe is wired, then check the flight stack settings:</p>
+<pre><code>voxl-configure-mpa
+voxl-configure-cameras
+
+<span class="cmt"># then edit /etc/modalai/voxl-px4.conf</span>
+AIRFRAME=MULTICOPTER
+GPS=AUTODETECT
+RC=CRSF_RAW          <span class="cmt"># CRSF_MAV if your RX speaks MAVLink</span>
+ESC=VOXL_ESC         <span class="cmt"># VOXL2_IO_PWM_ESC on Path B</span>
+POWER_MANAGER=VOXLPM</code></pre>
+    <p>Confirm the ESC is actually on the bus. This tool stops PX4 and disables its service to take the UART, so restart it afterwards &mdash; that is normal, not a fault:</p>
+<pre><code>voxl-esc detect
+voxl-esc calibrate
+
+<span class="cmt"># restore PX4 when done</span>
+systemctl enable voxl-px4 &amp;&amp; systemctl restart voxl-px4</code></pre>
+    <p>Then connect QGroundControl over the MAVLink bridge for airframe selection, sensor calibration and RC calibration. <code>voxl-mavlink-server</code> is already running on your board.</p>
+  </div>
+</li>
+
+<li class="stage">
+  <div class="stage-n"></div>
+  <div class="stage-b">
+    <h3>Bench bring-up</h3>
+    <p class="why">This is where you find the wiring mistakes, and the only safe time to find them.</p>
+    <div class="gate stop">
+      <span class="gate-k">Props off &mdash; all of stage 5</span>
+      <p>Remove every propeller before the battery goes in. A 6S quad that arms unexpectedly on a bench will take fingers. Props go on in stage 6 and not before.</p>
+    </div>
+    <p>Walk the signal chain the same way we walked it today &mdash; each of these should now have a live publisher:</p>
+<pre><code>px4-listener sensor_accel      <span class="cmt"># already good</span>
+px4-listener sensor_mag        <span class="cmt"># new &mdash; arrives with the GPS unit</span>
+px4-listener sensor_gps        <span class="cmt"># needs sky view for a fix</span>
+px4-listener input_rc          <span class="cmt"># timestamp_last_signal must be non-zero</span>
+px4-listener battery_status
+px4-listener actuator_outputs</code></pre>
+    <p>RC is already done &mdash; an ELRS receiver is bound and reporting <code>link_quality: 100</code> on J19. The tell is <code>timestamp_last_signal</code>, not whether the topic exists. Note that <code>rssi: -1</code> and <code>rc_total_frame_count: 0</code> are normal on CRSF and are not faults; see <code>RCSETUP.md</code>.</p>
+    <p>Then, still with props off: spin each motor individually and confirm motor order and direction against your airframe's layout, check the mag for interference by watching heading while you throttle up, and verify VIO is tracking with <code>voxl-inspect-qvio</code>.</p>
+  </div>
+</li>
+
+<li class="stage">
+  <div class="stage-n"></div>
+  <div class="stage-b">
+    <h3>First flight</h3>
+    <p class="why">Short, low, outdoors, and with a plan for putting it down.</p>
+    <ul>
+      <li>Fresh log enabled, battery failsafe and RC-loss failsafe configured and tested on the bench</li>
+      <li>Open space, no people, props inspected and torqued</li>
+      <li>First hover in <strong>Stabilized</strong>, not Position &mdash; you want to feel the trim before the position controller masks it</li>
+      <li>30 seconds at one metre. Land. Pull the log and read it before the second flight</li>
+      <li>Only then move to Position mode, then Offboard for autonomy work</li>
+    </ul>
+    <p>Once it hovers cleanly, the cameras you already have become the interesting part: QVIO for GPS-denied position hold, and the stereo front pair for depth and obstacle avoidance through <code>voxl-vision-hub</code>.</p>
+  </div>
+</li>
+
+</ol>
+
+<footer>
+  <p>Verified against your board over ADB on 15 Sep 2026. Versions and part numbers checked against ModalAI docs the same day.</p>
+  <ul>
+    <li><a href="https://docs.modalai.com/sdk-1.6-release-notes/">SDK 1.6 release notes</a> &mdash; platform support per release</li>
+    <li><a href="https://docs.modalai.com/flash-system-image/">Upgrading VOXL SDK</a> &mdash; flash procedure</li>
+    <li><a href="https://docs.modalai.com/voxl2-connectors/">VOXL 2 connectors</a> &mdash; confirm pinouts here</li>
+    <li><a href="https://docs.modalai.com/voxl-esc-datasheet/">VOXL ESC datasheet</a> &mdash; M0134 variants and ratings</li>
+    <li><a href="https://docs.modalai.com/voxl2-io/">VOXL 2 IO</a> &mdash; Path B expander board</li>
+    <li><a href="https://docs.px4.io/main/en/flight_controller/modalai_voxl_2">PX4 guide: VOXL 2</a></li>
+  </ul>
+</footer>
+
+</div>

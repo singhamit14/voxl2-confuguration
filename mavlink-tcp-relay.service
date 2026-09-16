@@ -1,0 +1,15 @@
+[Unit]
+Description=MAVLink TCP relay for QGC over adb forward (bench use)
+# Takes over the GCS path from voxl-mavlink-server, which owns UDP 14559.
+# The two cannot run at once.
+Conflicts=voxl-mavlink-server.service
+
+[Service]
+Type=simple
+ExecStartPre=-/bin/systemctl stop voxl-mavlink-server
+ExecStart=/usr/bin/python3 -u /data/mavlink-tcp-relay.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
